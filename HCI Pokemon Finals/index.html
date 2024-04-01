@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Battle</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .pokemon-img-container {
+            position: relative;
+            max-width: 300px;
+            height: 400px;
+        }
+        .pokemon-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            max-width: 300px;
+            height: 400px;
+        }
+        .pokemon-gif {
+            display: none; /* Initially hide gifs */
+            position: absolute;
+            max-width: 100px; /* Adjust size as needed */
+            height: auto; /* Adjust size as needed */
+        }
+        .fire-gif {
+            max-width: 250px;
+            height: auto;
+            top: 50%; /* Adjust vertical position */
+            right: -200px; /* Adjust horizontal position */
+        }
+        .cutting-gif {
+            max-width: 250px;
+            height: auto;
+            top: 25%; /* Adjust vertical position */
+            left: -200px; /* Adjust horizontal position */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <h2>Trainer Red's Pokémon</h2>
+                <div class="pokemon-img-container">
+                    <img src="https://img.pokemondb.net/sprites/black-white/anim/back-normal/charizard.gif" alt="Charizard" class="pokemon-img">
+                    <img src="fire.gif" alt="Fire" class="pokemon-gif fire-gif">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h2>Trainer Brendan's Pokémon</h2>
+                <div class="pokemon-img-container">
+                    <img src="https://img.pokemondb.net/sprites/black-white/anim/normal/sceptile.gif" alt="Sceptile" class="pokemon-img">
+                    <img src="cutting.gif" alt="Cutting" class="pokemon-gif cutting-gif">
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <h3>Battle Log</h3>
+                <ul id="battle-log" class="list-group">
+                </ul>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <button id="start-battle" class="btn btn-primary">Start Battle</button>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        console.log("Hello World");
+        let trainer1 = { name: 'Red', region: 'Kalos',
+            speak: function(target){
+                console.log(`You are challenged by Trainer ${target.name}`);
+                console.log(`Trainer ${target.name} sends out Sceptile`);
+                console.log(`Go Charizard!`);
+            }
+        };
+
+
+        let trainer2 = { name: 'Brendan', region: 'Kanto' };
+
+
+        function Pokemon(name, health, attack, level){
+            this.name = name;
+            this.basehealth = health;
+            this.health = 2 * health;
+            this.attack = attack;
+            this.level = level;
+            this.atk = function(target){
+                let logMessage = `${this.name} used Flamethrower on ${target.name}<br>`;
+                logMessage += 'It is Super Effective!<br>';
+                target.health -= this.attack;
+                logMessage += `${target.name}'s health is reduced to ${Math.max(0, target.health)}<br>`;
+                document.getElementById("battle-log").innerHTML += '<li class="list-group-item">' + logMessage + '</li>';
+            };
+
+
+            this.atk2 = function(target){
+                let logMessage = `${this.name} used Leaf Blade on ${target.name}<br>`;
+                logMessage += 'It is Not Very Effective...<br>';
+                target.health -= this.attack;
+                logMessage += `${target.name}'s health is reduced to ${Math.max(0, target.health)}<br>`;
+                document.getElementById("battle-log").innerHTML += '<li class="list-group-item">' + logMessage + '</li>';
+            };
+
+
+            this.levelUp = function() {
+                let logMessage = `${this.name} has leveled up! ${this.level} -> ${this.level + 1}<br>`;
+                logMessage += `HP: ${this.basehealth} -> ${this.basehealth + 4}<br>`;
+                logMessage += `ATK: ${this.attack} -> ${this.attack + 60}<br>`;
+                this.level++;
+                this.health += 4;
+                this.attack += 60;
+                document.getElementById("battle-log").innerHTML += '<li class="list-group-item">' + logMessage + '</li>';
+            };
+        }
+
+
+        let Charizard = new Pokemon('Charizard', 356, 231, 99);
+        let Sceptile = new Pokemon('Sceptile', 250, 157, 100);
+
+
+        document.getElementById("start-battle").addEventListener("click", function() {
+    trainer1.speak(trainer2);
+
+    // Show the gifs when battle starts
+    document.querySelectorAll('.pokemon-gif').forEach(function(gif) {
+        gif.style.display = 'inline-block';
+    });
+
+    // Hide the gifs after 5 seconds
+    setTimeout(function() {
+        document.querySelectorAll('.pokemon-gif').forEach(function(gif) {
+            gif.style.display = 'none';
+        });
+    }, 5000);
+
+    while (Charizard.health > 0 && Sceptile.health > 0) {
+        Charizard.atk(Sceptile);
+        if (Sceptile.health <= 0) {
+            let logMessage = `${Sceptile.name} fainted!<br>`;
+            logMessage += 'Trainer Red wins! Trainer Red receives 5000 Pokemon dollars for winning!<br>';
+            document.getElementById("battle-log").innerHTML += '<li class="list-group-item">' + logMessage + '</li>';
+            Charizard.levelUp();
+            break;
+        }
+        Sceptile.atk2(Charizard);
+        if (Charizard.health <= 0) {
+            let logMessage = `${Charizard.name} fainted!<br>`;
+            document.getElementById("battle-log").innerHTML += '<li class="list-group-item">' + logMessage + '</li>';
+            break;
+        }
+    }
+});
+    </script>
+</body>
+</html>
